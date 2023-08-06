@@ -1,4 +1,5 @@
 public class Card {
+
     private Suit suit;
     private int value;
 
@@ -18,6 +19,10 @@ public class Card {
         public int getValue() {
             return value;
         }
+    }
+    public Card(Suit suit, int value) {
+        this.suit = suit;
+        this.value = value;
     }
 
     public Suit getSuit() {
