@@ -2,14 +2,14 @@ import java.util.*;
 
 public class Game {
     private final int NUMBER_OF_PLAYERS;
-    private final String[] PLAYER_NAME_ARRAY;
+    private String[] playerNameArray;
     private boolean isGameOver;
     private Stack<Card> cardDeck;
     private Queue<ArrayList<Card>> playerArrayLinkedList;
 
     public Game(Scanner keyboard) {
         this.NUMBER_OF_PLAYERS = 3;
-        PLAYER_NAME_ARRAY = new String[NUMBER_OF_PLAYERS];
+        playerNameArray = new String[NUMBER_OF_PLAYERS];
         populatePlayerNameArray(keyboard);
         this.isGameOver = false;
         this.cardDeck = getCardDeck();
@@ -19,7 +19,7 @@ public class Game {
 
     private void populatePlayerNameArray(Scanner keyboard){
         for(int i = 0; i < NUMBER_OF_PLAYERS; i++){
-            PLAYER_NAME_ARRAY[i] = getPlayerName(keyboard);
+            playerNameArray[i] = getPlayerName(keyboard);
         }
     }
 
@@ -63,7 +63,7 @@ public class Game {
 
     }
 
-    private void draw() {
+    private void initialDraw() {
         for (ArrayList<Card> hand : playerArrayLinkedList) {
             hand.add(cardDeck.pop());
             hand.add(cardDeck.pop());
@@ -71,26 +71,81 @@ public class Game {
     }
 
     public void gamePlay() {
-        draw();
-        displayHand();
+        do {
+            initialDraw();
+            displayHand();
+            checkWinner();
+        }
+        while(!isGameOver);
+    }
+
+    private void checkWinner(){
+        int playerSelector = 0;
+        int total = 0;
+        for (ArrayList<Card> hand : playerArrayLinkedList) {
+           for (Card c : hand)
+           {
+               total += c.getValue();
+               if (total > 21) {
+                   defaultBustStrategy(playerNameArray[playerSelector]);
+                   playerArrayLinkedList.remove(hand);
+                   removePlayerName(playerNameArray[playerSelector]);
+               }
+               else if (total == 21) {
+                   isGameOver = true;
+                   displayWinner(playerNameArray[playerSelector]);
+               }
+               else if (total >= 17) {
+                   defaultStickStrategy(playerNameArray[playerSelector]);
+               }
+               else {
+                   defaultHitStrategy(hand, playerNameArray[playerSelector]);
+               }
+           }
+           playerSelector++;
+        }
+    }
+
+    private void removePlayerName(String playerName) {
+        int newArraySize = playerNameArray.length-1;
+        String[] playerNameArray = new String [newArraySize];
+        int newIndex = 0;
+        for (String str: this.playerNameArray){
+            if (!str.equals(playerName)){
+                playerNameArray[newIndex] = str;
+                newIndex++;
+            }
+        }
+        this.playerNameArray = playerNameArray;
     }
 
     private void displayHand(){
         int playerSelector = 0;
-        Iterator<ArrayList<Card>> iterator = playerArrayLinkedList.iterator();
-        while(iterator.hasNext() && playerSelector < NUMBER_OF_PLAYERS){
-            System.out.println(PLAYER_NAME_ARRAY[playerSelector] + " is dealt :");
-            ArrayList<Card> hand = iterator.next();
-            hand.forEach(System.out::println);
+        for (ArrayList<Card> cards : playerArrayLinkedList) {
+            System.out.println(playerNameArray[playerSelector] + " is dealt :");
+            cards.forEach(System.out::println);
             System.out.println();
             playerSelector++;
         }
     }
 
 
-
-    private void defaultHitStrategy(ArrayList<Card> hand) {
+    private void defaultHitStrategy(ArrayList<Card> hand, String playerName) {
+        System.out.printf("%s hits.%n", playerName);
         hand.add(cardDeck.pop());
+    }
+
+    private void defaultStickStrategy(String playerName){
+        System.out.printf("%s sticks.%n", playerName);
+    }
+
+    private void defaultBustStrategy(String playerName){
+        System.out.printf("%s busts.%n", playerName);
+        System.out.printf("%s is ejected fromm the game.%n", playerName);
+    }
+    
+    private void displayWinner(String playerName){
+        System.out.printf("%s has won!%n", playerName);
     }
 
 }
