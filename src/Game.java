@@ -107,13 +107,13 @@ public class Game {
     }
 
     private void removePlayerName(String playerName) {
-        int newArraySize = playerNameArray.length-1;
-        String[] playerNameArray = new String [newArraySize];
-        int newIndex = 0;
+        int size = this.playerNameArray.length-1;
+        String[] playerNameArray = new String[size];
+        int index = 0;
         for (String str: this.playerNameArray){
             if (!str.equals(playerName)){
-                playerNameArray[newIndex] = str;
-                newIndex++;
+                playerNameArray[index] = str;
+                index++;
             }
         }
         this.playerNameArray = playerNameArray;
