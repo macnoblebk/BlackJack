@@ -70,10 +70,24 @@ public class Game {
         }
     }
 
-    private void gamePlay() {
+    public void gamePlay() {
         draw();
-
+        displayHand();
     }
+
+    private void displayHand(){
+        int playerSelector = 0;
+        Iterator<ArrayList<Card>> iterator = playerArrayLinkedList.iterator();
+        while(iterator.hasNext() && playerSelector < NUMBER_OF_PLAYERS){
+            System.out.println(PLAYER_NAME_ARRAY[playerSelector] + " is dealt :");
+            ArrayList<Card> hand = iterator.next();
+            hand.forEach(System.out::println);
+            System.out.println();
+            playerSelector++;
+        }
+    }
+
+
 
     private void defaultHitStrategy(ArrayList<Card> hand) {
         hand.add(cardDeck.pop());
