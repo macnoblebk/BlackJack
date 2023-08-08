@@ -12,7 +12,7 @@ public class Game {
         this.NUMBER_OF_PLAYERS = 3;
         this.INITIAL_HAND = 2;
         playerNameList = new ArrayList<>(NUMBER_OF_PLAYERS);
-        playerStickStatus = new ArrayList<>(Arrays.asList(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE));
+        playerStickStatus = new ArrayList<>(Arrays.asList(false, false, false));
         populatePlayerNameArray(keyboard);
         this.isGameOver = false;
         this.cardDeck = getCardDeck();
@@ -103,7 +103,6 @@ public class Game {
                        isGameOver = true;
                        displayWinner(playerNameList.get(playerSelector));
                    }
-                      isGameOver = true;
                }
                else if (total == 21) {
                    isGameOver = true;
@@ -111,7 +110,7 @@ public class Game {
                }
                else if (total >= 17) {
                    defaultStickStrategy(playerNameList.get(playerSelector));
-                   playerStickStatus.set(playerSelector, Boolean.TRUE);
+                   playerStickStatus.set(playerSelector, true);
                    if (checkPlayerStickStatus()){
                        isGameOver = true;
                        tieGame();
@@ -122,6 +121,7 @@ public class Game {
                    ArrayList<ArrayList<Card>> newList = new ArrayList<>(playerHandList);
                    newList.get(playerSelector).add(cardDeck.pop());
                    playerHandList = newList;
+                   //TODO: Create new hand, modify new, assign to old
                }
            }
            playerSelector++;
