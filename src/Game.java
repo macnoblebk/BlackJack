@@ -71,20 +71,24 @@ public class Game {
     }
 
     public void gamePlay() {
+        initialDraw();
+        displayHand();
+
         do {
-            initialDraw();
+            gameEngine();
             displayHand();
-            checkWinner();
-        }
-        while(!isGameOver);
+        } while(!isGameOver);
+
+        // TODO: All the players “stick” in a round end game
+        // TODO: End game if only one player left
+        // TODO: At the end of game if no player hits 21, player with total closes to 21 wins
     }
 
-    private void checkWinner(){
+    private void gameEngine(){
         int playerSelector = 0;
         int total = 0;
         for (ArrayList<Card> hand : playerArrayLinkedList) {
-           for (Card c : hand)
-           {
+           for (Card c : hand) {
                total += c.getValue();
                if (total > 21) {
                    defaultBustStrategy(playerNameArray[playerSelector]);
