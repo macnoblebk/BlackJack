@@ -156,7 +156,7 @@ public class Game {
     private void displayHand(){
         int playerSelector = 0;
         for (ArrayList<Card> cards : playerArrayLinkedList) {
-            System.out.println(playerNameArray[playerSelector] + " is dealt :");
+            System.out.printf("%n%s is dealt :%n",  playerNameArray[playerSelector]);
             cards.forEach(System.out::println);
             System.out.println();
             playerSelector++;
