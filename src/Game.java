@@ -2,14 +2,18 @@ import java.util.*;
 
 public class Game {
     private final int NUMBER_OF_PLAYERS;
+    private final int INITIAL_HAND;
     private String[] playerNameArray;
     private boolean isGameOver;
+    private boolean[] playerStickStatus;
     private Stack<Card> cardDeck;
     private Queue<ArrayList<Card>> playerArrayLinkedList;
 
     public Game(Scanner keyboard) {
         this.NUMBER_OF_PLAYERS = 3;
+        this.INITIAL_HAND = 2;
         playerNameArray = new String[NUMBER_OF_PLAYERS];
+        playerStickStatus = new boolean[]{false, false, false};
         populatePlayerNameArray(keyboard);
         this.isGameOver = false;
         this.cardDeck = getCardDeck();
@@ -65,8 +69,9 @@ public class Game {
 
     private void initialDraw() {
         for (ArrayList<Card> hand : playerArrayLinkedList) {
-            hand.add(cardDeck.pop());
-            hand.add(cardDeck.pop());
+            for (int i = 0; i < INITIAL_HAND; i++) {
+                hand.add(cardDeck.pop());
+            }
         }
     }
 
@@ -79,9 +84,7 @@ public class Game {
             displayHand();
         } while(!isGameOver);
 
-        // TODO: All the players “stick” in a round end game
-        // TODO: End game if only one player left
-        // TODO: At the end of game if no player hits 21, player with total closes to 21 wins
+        // TODO: At the end of game, if no player hits 21, player with total closest to 21 wins
     }
 
     private void gameEngine(){
@@ -94,6 +97,11 @@ public class Game {
                    defaultBustStrategy(playerNameArray[playerSelector]);
                    playerArrayLinkedList.remove(hand);
                    removePlayerName(playerNameArray[playerSelector]);
+                   if(checkWinner()){
+                       isGameOver = true;
+                       displayWinner(playerNameArray[playerSelector]);
+                   }
+                      isGameOver = true;
                }
                else if (total == 21) {
                    isGameOver = true;
@@ -101,6 +109,11 @@ public class Game {
                }
                else if (total >= 17) {
                    defaultStickStrategy(playerNameArray[playerSelector]);
+                   playerStickStatus[playerSelector] = true;
+                   if (checkPlayerStickStatus()){
+                       isGameOver = true;
+                       tieGame();
+                   }
                }
                else {
                    defaultHitStrategy(hand, playerNameArray[playerSelector]);
@@ -108,6 +121,23 @@ public class Game {
            }
            playerSelector++;
         }
+    }
+
+    private boolean checkWinner(){
+        return (playerArrayLinkedList.size() == 1);
+    }
+    private void tieGame(){
+        System.out.println("Game over due to all players sticking.");
+    }
+
+    private boolean checkPlayerStickStatus(){
+        boolean allStick = true;
+        for (boolean value: playerStickStatus){
+            if (!value) {
+                allStick = false;
+            }
+        }
+        return allStick;
     }
 
     private void removePlayerName(String playerName) {
