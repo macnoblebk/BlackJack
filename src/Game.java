@@ -1,29 +1,28 @@
 import java.util.*;
 
 public class Game {
-    private final int NUMBER_OF_PLAYERS;
-    private final int INITIAL_HAND;
-    private String[] playerNameArray;
-    private boolean isGameOver;
-    private boolean[] playerStickStatus;
+    private final Integer NUMBER_OF_PLAYERS;
+    private final Integer INITIAL_HAND;
+    private ArrayList<String> playerNameList;
+    private Boolean isGameOver;
+    private ArrayList<Boolean> playerStickStatus;
     private Stack<Card> cardDeck;
-    private Queue<ArrayList<Card>> playerArrayLinkedList;
-
+    private ArrayList<ArrayList<Card>> playerHandList;
     public Game(Scanner keyboard) {
         this.NUMBER_OF_PLAYERS = 3;
         this.INITIAL_HAND = 2;
-        playerNameArray = new String[NUMBER_OF_PLAYERS];
-        playerStickStatus = new boolean[]{false, false, false};
+        playerNameList = new ArrayList<>(NUMBER_OF_PLAYERS);
+        playerStickStatus = new ArrayList<>(Arrays.asList(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE));
         populatePlayerNameArray(keyboard);
         this.isGameOver = false;
         this.cardDeck = getCardDeck();
-        playerArrayLinkedList = new LinkedList<>();
+        playerHandList = new ArrayList<>();
         initializePlayerQueue();
     }
 
     private void populatePlayerNameArray(Scanner keyboard){
         for(int i = 0; i < NUMBER_OF_PLAYERS; i++){
-            playerNameArray[i] = getPlayerName(keyboard);
+            playerNameList.add(getPlayerName(keyboard));
         }
     }
 
@@ -53,22 +52,20 @@ public class Game {
                 list.add(new Card(cs, cv.getValue()));
             }
         }
-
         Collections.shuffle(list);
         cardStack.addAll(list);
-
         return cardStack;
     }
 
     private void initializePlayerQueue(){
         for (int i = 0; i < NUMBER_OF_PLAYERS; i++) {
-            playerArrayLinkedList.add(new ArrayList<>());
+            playerHandList.add(new ArrayList<>());
         }
 
     }
 
     private void initialDraw() {
-        for (ArrayList<Card> hand : playerArrayLinkedList) {
+        for (ArrayList<Card> hand : playerHandList) {
             for (int i = 0; i < INITIAL_HAND; i++) {
                 hand.add(cardDeck.pop());
             }
@@ -89,34 +86,42 @@ public class Game {
 
     private void gameEngine(){
         int playerSelector = 0;
-        int total = 0;
-        for (ArrayList<Card> hand : playerArrayLinkedList) {
+
+        for (ArrayList<Card> hand : playerHandList) {
+            int total = 0;
            for (Card c : hand) {
                total += c.getValue();
+
                if (total > 21) {
-                   defaultBustStrategy(playerNameArray[playerSelector]);
-                   playerArrayLinkedList.remove(hand);
-                   removePlayerName(playerNameArray[playerSelector]);
+                   defaultBustStrategy(playerNameList.get(playerSelector));
+                   ArrayList<ArrayList<Card>> newList = new ArrayList<>(playerHandList);
+                   newList.remove(hand);
+                   playerHandList = newList;
+                   playerNameList.remove(playerSelector);
+
                    if(checkWinner()){
                        isGameOver = true;
-                       displayWinner(playerNameArray[playerSelector]);
+                       displayWinner(playerNameList.get(playerSelector));
                    }
                       isGameOver = true;
                }
                else if (total == 21) {
                    isGameOver = true;
-                   displayWinner(playerNameArray[playerSelector]);
+                   displayWinner(playerNameList.get(playerSelector));
                }
                else if (total >= 17) {
-                   defaultStickStrategy(playerNameArray[playerSelector]);
-                   playerStickStatus[playerSelector] = true;
+                   defaultStickStrategy(playerNameList.get(playerSelector));
+                   playerStickStatus.set(playerSelector, Boolean.TRUE);
                    if (checkPlayerStickStatus()){
                        isGameOver = true;
                        tieGame();
                    }
                }
                else {
-                   defaultHitStrategy(hand, playerNameArray[playerSelector]);
+                   defaultHitStrategy(playerNameList.get(playerSelector));
+                   ArrayList<ArrayList<Card>> newList = new ArrayList<>(playerHandList);
+                   newList.get(playerSelector).add(cardDeck.pop());
+                   playerHandList = newList;
                }
            }
            playerSelector++;
@@ -124,7 +129,7 @@ public class Game {
     }
 
     private boolean checkWinner(){
-        return (playerArrayLinkedList.size() == 1);
+        return (playerHandList.size() == 1);
     }
     private void tieGame(){
         System.out.println("Game over due to all players sticking.");
@@ -140,33 +145,18 @@ public class Game {
         return allStick;
     }
 
-    private void removePlayerName(String playerName) {
-        int size = this.playerNameArray.length-1;
-        String[] playerNameArray = new String[size];
-        int index = 0;
-        for (String str: this.playerNameArray){
-            if (!str.equals(playerName)){
-                playerNameArray[index] = str;
-                index++;
-            }
-        }
-        this.playerNameArray = playerNameArray;
-    }
-
     private void displayHand(){
         int playerSelector = 0;
-        for (ArrayList<Card> cards : playerArrayLinkedList) {
-            System.out.printf("%n%s is dealt :%n",  playerNameArray[playerSelector]);
-            cards.forEach(System.out::println);
+        for (ArrayList<Card> hand : playerHandList) {
+            System.out.printf("%n%s is dealt :%n",  playerNameList.get(playerSelector));
+            hand.forEach(System.out::println);
             System.out.println();
             playerSelector++;
         }
     }
 
-
-    private void defaultHitStrategy(ArrayList<Card> hand, String playerName) {
+    private void defaultHitStrategy(String playerName) {
         System.out.printf("%s hits.%n", playerName);
-        hand.add(cardDeck.pop());
     }
 
     private void defaultStickStrategy(String playerName){
