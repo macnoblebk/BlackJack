@@ -72,63 +72,69 @@ public class Game {
         }
     }
 
-    public void gamePlay() {
-        initialDraw();
-        displayHand();
-
-        do {
-            gameEngine();
-            displayHand();
-        } while(!isGameOver);
-
-        // TODO: At the end of game, if no player hits 21, player with total closest to 21 wins
+    public void play() {
+        gameEngine();
     }
 
     private void gameEngine(){
+
+        // TODO: At the end of game, if no player hits 21, player with total closest to 21 wins
         int playerSelector = 0;
+        initialDraw();
+        displayInitialHand();
 
-        for (ArrayList<Card> hand : playerHandList) {
-            int total = 0;
-           for (Card c : hand) {
-               total += c.getValue();
+        do {
+            displayCurrentHand();
+            for (ArrayList<Card> hand : playerHandList) {
+                int total = 0;
+                for (Card c : hand) total += c.getValue();
 
-               if (total > 21) {
-                   defaultBustStrategy(playerNameList.get(playerSelector));
-                   ArrayList<ArrayList<Card>> newList = new ArrayList<>(playerHandList);
-                   newList.remove(hand);
-                   playerHandList = newList;
-                   playerNameList.remove(playerSelector);
+                if (total > 21) {
+                    defaultBustStrategy(playerNameList.get(playerSelector % NUMBER_OF_PLAYERS));
+                    ArrayList<ArrayList<Card>> newList = new ArrayList<>(playerHandList);
+                    newList.remove(hand);
+                    playerHandList = newList;
+                    playerNameList.remove(playerSelector % NUMBER_OF_PLAYERS);
 
-                   if(checkWinner()){
-                       isGameOver = true;
-                       displayWinner(playerNameList.get(playerSelector));
-                   }
-               }
-               else if (total == 21) {
-                   isGameOver = true;
-                   displayWinner(playerNameList.get(playerSelector));
-               }
-               else if (total >= 17) {
-                   defaultStickStrategy(playerNameList.get(playerSelector));
-                   playerStickStatus.set(playerSelector, true);
-                   if (checkPlayerStickStatus()){
-                       isGameOver = true;
-                       tieGame();
-                   }
-               }
-               else {
-                   defaultHitStrategy(playerNameList.get(playerSelector));
-                   ArrayList<ArrayList<Card>> newList = new ArrayList<>(playerHandList);
-                   newList.get(playerSelector).add(cardDeck.pop());
-                   playerHandList = newList;
-                   //TODO: Create new hand, modify new, assign to old
-               }
-           }
-           playerSelector++;
-        }
+                    // TODO: Fix issue with skipping over next player (NUMBER_OF_PLAYERS), use arraylist.size() as nop
+
+                    if(checkWinnerByListSize()){
+                        isGameOver = true;
+                        displayWinner(playerNameList.get(0));
+                    }
+                    playerSelector = getNextPlayer(playerSelector);;
+                }
+                else if (total == 21) {
+                    isGameOver = true;
+                    displayWinner(playerNameList.get(playerSelector % NUMBER_OF_PLAYERS));
+                    playerSelector++;
+                }
+                else if (total >= 17) {
+                    defaultStickStrategy(playerNameList.get(playerSelector % NUMBER_OF_PLAYERS));
+                    playerStickStatus.set(playerSelector % NUMBER_OF_PLAYERS, true);
+                    if (checkPlayerStickStatus()){
+                        isGameOver = true;
+                        tieGame();
+                    }
+                    playerSelector++;
+                }
+                else {
+//                   defaultHitStrategy(playerNameList.get(playerSelector % NUMBER_OF_PLAYERS));
+//                   ArrayList<ArrayList<Card>> newList = new ArrayList<>(playerHandList);
+//                   newList.get(playerSelector % NUMBER_OF_PLAYERS).add(cardDeck.pop());
+//                   playerHandList = newList;
+                    System.out.println("This is the else branch!");
+//                    //TODO: Create new hand, modify new, assign to old
+//                    playerSelector++;
+                }
+            }
+        } while (!isGameOver);
     }
 
-    private boolean checkWinner(){
+    private int getNextPlayer(int playerSelector){
+        return (playerSelector % NUMBER_OF_PLAYERS == 1) ? 1 : 0;
+    }
+    private boolean checkWinnerByListSize(){
         return (playerHandList.size() == 1);
     }
     private void tieGame(){
@@ -145,31 +151,41 @@ public class Game {
         return allStick;
     }
 
-    private void displayHand(){
+    private void displayInitialHand(){
         int playerSelector = 0;
         for (ArrayList<Card> hand : playerHandList) {
             System.out.printf("%n%s is dealt :%n",  playerNameList.get(playerSelector));
             hand.forEach(System.out::println);
-            System.out.println();
             playerSelector++;
         }
     }
 
+    private void displayCurrentHand(){
+        int playerSelector = 0;
+        for (ArrayList<Card> hand : playerHandList) {
+            System.out.printf("%n%s hand :%n",  playerNameList.get(playerSelector));
+            hand.forEach(System.out::println);
+            playerSelector++;
+        }
+    }
+
+
+
     private void defaultHitStrategy(String playerName) {
-        System.out.printf("%s hits.%n", playerName);
+        System.out.printf("%n%s hits.%n", playerName);
     }
 
     private void defaultStickStrategy(String playerName){
-        System.out.printf("%s sticks.%n", playerName);
+        System.out.printf("%n%s sticks.%n", playerName);
     }
 
     private void defaultBustStrategy(String playerName){
-        System.out.printf("%s busts.%n", playerName);
-        System.out.printf("%s is ejected fromm the game.%n", playerName);
+        System.out.printf("%n%s busts.%n", playerName);
+        System.out.printf("%n%s is ejected fromm the game.%n", playerName);
     }
-    
+
     private void displayWinner(String playerName){
-        System.out.printf("%s has won!%n", playerName);
+        System.out.printf("%n%s has won!%n", playerName);
     }
 
 }
